@@ -19,7 +19,7 @@ pygame.display.set_caption("")
 
 done = False
 state="Main Menu"
-health=0
+health=100
 ##player = pygame.image.load('player.png')
 playerx=200
 playery=200
@@ -90,6 +90,9 @@ class Player(ImageBlock):
             if self.velocity_y >0:
                 self.rect.bottom = platform.rect.top
                 self.velocity_y=0
+                
+        # check for collision with finish line
+        
 
     def jump(self):
         self.velocity_y=self.jump_height
@@ -102,6 +105,10 @@ all_sprites_list = pygame.sprite.Group()
 player=Player("player.png", 25, 50) # instantiate the player
 player.rect.x=50
 player.rect.y=50
+
+finish=ImageBlock("finish.png",127/4,458/4)
+finish.rect.x=(700-(127/4))
+finish.rect.y=(300-(458/4))
 
 
 block1=Block(BLACK,200,200)
@@ -185,18 +192,27 @@ while not done:
 
         
         platforms.add(block1, block2, block3)
-        all_sprites_list.add(block1, block2, block3)
+        all_sprites_list.add(block1, block2, block3, finish)
 
-        player.update(platforms)
+        
         all_sprites_list.draw(screen)
-
-
+        
 
 
         if left:   # Handling of movement with variables to ensure key holds
             player.rect.x-=3
         if right:
             player.rect.x+=3
+
+            
+
+        if player.rect.colliderect(finish.rect):
+            state="Finish"
+
+        player.update(platforms)
+
+    if state == "Finish":
+        text(40, "Level Complete", 240, 50)
 
         
 
