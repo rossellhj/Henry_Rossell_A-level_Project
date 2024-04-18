@@ -23,6 +23,8 @@ health=0
 ##player = pygame.image.load('player.png')
 playerx=200
 playery=200
+left=False
+right=False
 
 
 
@@ -71,15 +73,46 @@ class ImageBlock(pygame.sprite.Sprite):
     def move_down(self):
         self.rect.y += 20
 
+class Player(ImageBlock):
+    def __init__(self, image_path, width, height):
+        super().__init__(image_path, width, height)
+        self.velocity_y=0
+        self.jump_height=-3
 
-block_list = pygame.sprite.Group()
+    def update(self, platforms):
+        self.velocity_y+=0.3
+        self.rect.y+=self.velocity_y
+
+        # check for collisions with platforms
+        collisions = pygame.sprite.spritecollide(self, platforms, False)
+        for platform in collisions:
+            # if the player is moving downwards, stop downwards movement
+            if self.velocity_y >0:
+                self.rect.bottom = platform.rect.top
+                self.velocity_y=0
+
+    def jump(self):
+        self.velocity_y=self.jump_height
+        
+
+
+platforms = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
 
-player=ImageBlock("player.png", 50, 50) # instantiate the player
+player=Player("player.png", 25, 50) # instantiate the player
 player.rect.x=50
 player.rect.y=50
 
 
+block1=Block(BLACK,200,200)
+block1.rect.x=0
+block1.rect.y=300
+block2=Block(BLACK,300,300)
+block2.rect.x=400
+block2.rect.y=300
+block3=Block(BLACK,100,15)
+block3.rect.x=400
+block3.rect.y=100
 
 
 
@@ -103,6 +136,7 @@ while not done:
             done = True
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                # Handle state transitions
                 if state == "Main Menu":
                     state = "Select team"
                 elif state == "Select team":
@@ -113,6 +147,18 @@ while not done:
                 player.rect.y-=20
             elif event.key == pygame.K_DOWN:
                 player.rect.y+=20
+            elif event.key == pygame.K_LEFT:
+                left=True
+            elif event.key == pygame.K_RIGHT:
+                right=True
+            elif event.key == pygame.K_SPACE:
+                player.jump()
+            
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                left=False
+            if event.key == pygame.K_RIGHT:
+                right=False
             
     screen.fill(BLUE)
 
@@ -130,6 +176,7 @@ while not done:
         text(40, "Select Level", 240, 50)
 
     if state == "Level 1":
+        
         text(15, "Health:", 20, 10)
         text(15, str(health), 100,10)
         text(15, "Timer:", 600, 10)
@@ -137,9 +184,24 @@ while not done:
         all_sprites_list.add(player)
 
         
+        platforms.add(block1, block2, block3)
+        all_sprites_list.add(block1, block2, block3)
+
+        player.update(platforms)
+        all_sprites_list.draw(screen)
 
 
-    all_sprites_list.draw(screen)
+
+
+        if left:   # Handling of movement with variables to ensure key holds
+            player.rect.x-=3
+        if right:
+            player.rect.x+=3
+
+        
+
+
+    
         
     pygame.display.flip()
 
