@@ -45,6 +45,35 @@ class Block(pygame.sprite.Sprite):
         # of rect.x and rect.y
         self.rect = self.image.get_rect()
 
+        
+
+
+
+
+
+
+class Line(pygame.sprite.Sprite):
+    def __init__(self, color, start_pos, end_pos, width=1):
+        super().__init__()
+        # initialise line class attributes
+        self.color = color
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.width = width
+        # create surface and rect for line - so can be added to all_sprites_list
+        
+    def update(self):
+        self.image = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        pygame.draw.line(self.image, self.color, self.start_pos, self.end_pos, self.width)
+        self.rect = self.image.get_rect()
+
+    def updateLine(self, startpos, endpos):
+        self.start_pos=startpos
+        self.end_pos=endpos
+        self.update()
+
+        
+
 class ImageBlock(pygame.sprite.Sprite):
  
     def __init__(self, image_path, width, height):
@@ -72,6 +101,15 @@ class ImageBlock(pygame.sprite.Sprite):
 class Enemy(ImageBlock):
     def __init__(self, image_path, width, height):
         super().__init__(image_path, width, height)
+
+##    def tempLine(self):
+##        self.temp_shoot=Line(BLACK, (self.rect.x, self.rect.y), (player.rect.x,player.rect.y))
+##        all_sprites_list.add(self.temp_shoot)
+##
+##    def updateLine():
+##        pass
+##        
+        
 
         
 
@@ -116,23 +154,12 @@ class Player(ImageBlock):
         self.temp_hit.kill()
 
 
-##class TempLine(pygame.sprite.Sprite):
-## 
-##    def __init__(self, color, width, height):
-## 
-##        # Call the parent class (Sprite) constructor
-##        super().__init__()
-## 
-##        # Create an image of the block, and fill it with a color
-##        self.image = pygame.Line([width, height])
-##        self.image.fill(color)
-## 
-##        # Fetch the rectangle object that has the dimensions of the image
-##        # image.
-##        # Update the position of this object by setting the values
-##        # of rect.x and rect.y
-##        self.rect = self.image.get_rect()
+
         
+
+line1 = Line(RED, (100, 100), (500, 100))
+
+
 
 
 platforms = pygame.sprite.Group()
@@ -163,8 +190,12 @@ block3=Block(BLACK,100,15)
 block3.rect.x=400
 block3.rect.y=100
 
+
+line2 = Line(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x,player.rect.y))
+
+
 platforms.add(block1, block2, block3)
-all_sprites_list.add(player, block1, block2, block3, finish, enemy1)
+all_sprites_list.add(player, block1, block2, block3, finish, enemy1, line1)
 
 
 
@@ -264,10 +295,18 @@ while not done:
             player.rect.x=50
             player.rect.y=50
 
+        line1.updateLine((player.rect.x, player.rect.y), (enemy1.rect.x,enemy1.rect.y))
+
+        
 
         all_sprites_list.draw(screen)
 
+
+        
+
         player.update(platforms)
+
+        
 
     if state == "Finish":
         text(40, "Level Complete", 200, 50)
