@@ -1,6 +1,7 @@
 print("Welcome")
 
 import pygame
+import math
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -26,6 +27,8 @@ playery=200
 left=False
 right=False
 
+firing_timer=0
+
 
 
 class Block(pygame.sprite.Sprite):
@@ -47,11 +50,6 @@ class Block(pygame.sprite.Sprite):
 
         
 
-
-
-
-
-
 class Line(pygame.sprite.Sprite):
     def __init__(self, color, start_pos, end_pos, width=1):
         super().__init__()
@@ -71,6 +69,48 @@ class Line(pygame.sprite.Sprite):
         self.start_pos=startpos
         self.end_pos=endpos
         self.update()
+
+        
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, color, start_pos, end_pos, radius, speed):
+        super().__init__()
+        # initialise line class attributes
+        self.color = color
+        self.pos=start_pos
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.radius = radius
+        self.speed = speed
+        self.direction = self.calculateDirection()
+        # create surface and rect for circle - so can be added to all_sprites_list
+        
+    
+        self.image = pygame.Surface((2 * radius, 2 * radius), pygame.SRCALPHA)  #use a smaller surface for the bullet
+        pygame.draw.circle(self.image, self.color, (radius, radius), radius)
+        self.rect = self.image.get_rect(center=start_pos)
+
+    def update(self):
+        self.pos = (self.pos[0] + self.direction[0] * self.speed, self.pos[1] + self.direction[1] * self.speed)
+        self.rect.center = self.pos   
+
+    def updateCircle(self, pos):
+        self.pos=pos
+        self.update()
+
+    def calculateDirection(self):
+
+        #calculate x and y components of distance between enemy + player
+        dx = self.end_pos[0] - self.start_pos[0]
+        dy = self.end_pos[1] - self.start_pos[1]
+
+        #use Pythagoras theorem to calculate magnitude of distance between enemy + player
+        distance = math.sqrt(dx ** 2 + dy ** 2)  
+        if distance == 0: #do not allow bullets fired when player + enemy occupying same position
+            return (0, 0)
+        else:
+            return (dx / distance, dy / distance) #return unit vector by dividing vector by magnitude
 
         
 
@@ -161,6 +201,10 @@ line1 = Line(RED, (100, 100), (500, 100))
 
 
 
+#bullet1 = Bullet(BLACK, (100,100),(400,200), 4, 10)
+
+
+
 
 platforms = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
@@ -192,6 +236,11 @@ block3.rect.y=100
 
 
 line2 = Line(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x,player.rect.y))
+
+
+
+bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, 10)
+
 
 
 platforms.add(block1, block2, block3)
@@ -235,6 +284,11 @@ while not done:
             elif event.key == pygame.K_SPACE:
                 player.jump()
             elif event.key == pygame.K_f:
+
+                
+                
+
+                
                 if player.sword():
                     print("killed")
                     enemies.remove(enemy1)
@@ -295,11 +349,22 @@ while not done:
             player.rect.x=50
             player.rect.y=50
 
-        line1.updateLine((player.rect.x, player.rect.y), (enemy1.rect.x,enemy1.rect.y))
+            
 
+        line1.updateLine((enemy1.rect.x + 5,enemy1.rect.y + 25), (player.rect.x + 12.5, player.rect.y + 10))
+
+
+        #bullet1.updateCircle((player.rect.x, player.rect.y))
+
+
+        bullet.update()
+        
         
 
         all_sprites_list.draw(screen)
+
+
+        
 
 
         
@@ -312,11 +377,15 @@ while not done:
         text(40, "Level Complete", 200, 50)
 
         
+    if firing_timer % 30 == 0:
+        bullet = Bullet(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x, player.rect.y), 5, 5)
+        all_sprites_list.add(bullet)
 
-    
     
         
     pygame.display.flip()
+
+    firing_timer+=1
 
     clock.tick(60)
 
