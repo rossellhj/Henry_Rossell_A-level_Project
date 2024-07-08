@@ -20,7 +20,7 @@ pygame.display.set_caption("")
 done = False
 state="Main Menu"
 health=100
-##player = pygame.image.load('player.png')
+#player = pygame.image.load('player.png')
 playerx=200
 playery=200
 left=False
@@ -29,14 +29,8 @@ right=False
 
 
 class Block(pygame.sprite.Sprite):
-    """
-    This class represents the ball.
-    It derives from the "Sprite" class in Pygame.
-    """
  
     def __init__(self, color, width, height):
-        """ Constructor. Pass in the color of the block,
-        and its size. """
  
         # Call the parent class (Sprite) constructor
         super().__init__()
@@ -68,10 +62,18 @@ class ImageBlock(pygame.sprite.Sprite):
         # of rect.x and rect.y
         self.rect = self.image.get_rect()
 
+
     def move_up(self):
         self.rect.y -= 20
     def move_down(self):
         self.rect.y += 20
+
+
+class Enemy(ImageBlock):
+    def __init__(self, image_path, width, height):
+        super().__init__(image_path, width, height)
+
+        
 
 class Player(ImageBlock):
     def __init__(self, image_path, width, height):
@@ -91,20 +93,60 @@ class Player(ImageBlock):
                 self.rect.bottom = platform.rect.top
                 self.velocity_y=0
                 
-        # check for collision with finish line
         
-
     def jump(self):
         self.velocity_y=self.jump_height
+
+    def sword(self):
+        # instantiate temporary box where sword is being struck
+        self.temp_hit = Block(WHITE,50,50)
+        self.temp_hit.rect.x=self.rect.x
+        self.temp_hit.rect.y=self.rect.y
+        all_sprites_list.add(self.temp_hit)
+
+        # check for collision with enemy
+
+        
+        if self.temp_hit.rect.colliderect(enemy1.rect):
+            return True
+        
+        return False
+
+    def remove_sword(self):
+        self.temp_hit.kill()
+
+
+##class TempLine(pygame.sprite.Sprite):
+## 
+##    def __init__(self, color, width, height):
+## 
+##        # Call the parent class (Sprite) constructor
+##        super().__init__()
+## 
+##        # Create an image of the block, and fill it with a color
+##        self.image = pygame.Line([width, height])
+##        self.image.fill(color)
+## 
+##        # Fetch the rectangle object that has the dimensions of the image
+##        # image.
+##        # Update the position of this object by setting the values
+##        # of rect.x and rect.y
+##        self.rect = self.image.get_rect()
         
 
 
 platforms = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 
 player=Player("player.png", 25, 50) # instantiate the player
 player.rect.x=50
 player.rect.y=50
+
+enemy1=Enemy("enemy.png", 25, 50) # instantiate the enemy
+enemy1.rect.x=400
+enemy1.rect.y=50
+enemies.add(enemy1)
 
 finish=ImageBlock("finish.png",127/4,458/4)
 finish.rect.x=(700-(127/4))
@@ -121,7 +163,8 @@ block3=Block(BLACK,100,15)
 block3.rect.x=400
 block3.rect.y=100
 
-
+platforms.add(block1, block2, block3)
+all_sprites_list.add(player, block1, block2, block3, finish, enemy1)
 
 
 
@@ -160,13 +203,20 @@ while not done:
                 right=True
             elif event.key == pygame.K_SPACE:
                 player.jump()
+            elif event.key == pygame.K_f:
+                if player.sword():
+                    print("killed")
+                    enemies.remove(enemy1)
+                    enemy1.kill()
             
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 left=False
             if event.key == pygame.K_RIGHT:
                 right=False
-            
+            if event.key == pygame.K_f:
+                player.remove_sword()
+
     screen.fill(BLUE)
 
     if state == "Main Menu":
@@ -191,11 +241,11 @@ while not done:
         all_sprites_list.add(player)
 
         
-        platforms.add(block1, block2, block3)
-        all_sprites_list.add(block1, block2, block3, finish)
+##        platforms.add(block1, block2, block3)
+##        all_sprites_list.add(block1, block2, block3, finish, enemy1)
 
         
-        all_sprites_list.draw(screen)
+        
         
 
 
@@ -206,17 +256,25 @@ while not done:
 
             
 
-        if player.rect.colliderect(finish.rect):
+        if player.rect.colliderect(finish.rect): # check for collision with finish line
             state="Finish"
+
+        if player.rect.y>550:
+            print("fallen")
+            player.rect.x=50
+            player.rect.y=50
+
+
+        all_sprites_list.draw(screen)
 
         player.update(platforms)
 
     if state == "Finish":
-        text(40, "Level Complete", 240, 50)
+        text(40, "Level Complete", 200, 50)
 
         
 
-
+    
     
         
     pygame.display.flip()
