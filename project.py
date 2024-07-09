@@ -29,6 +29,8 @@ right=False
 
 firing_timer=0
 
+enemy_fire=True
+
 
 
 class Block(pygame.sprite.Sprite):
@@ -69,6 +71,22 @@ class Line(pygame.sprite.Sprite):
         self.start_pos=startpos
         self.end_pos=endpos
         self.update()
+
+
+        
+
+
+    def intersects_platform(self, start_pos, end_pos, platforms): #checks if line of sight intersects a platform
+
+        #create bounding rectangle to check for intersections;
+        #top left corner is min x and y co-ords, width and height are differences in start_pos/end_pos x and y co-ords
+        line_rect = pygame.Rect(min(start_pos[0], end_pos[0]), min(start_pos[1], end_pos[1]),
+                                abs(start_pos[0] - end_pos[0]), abs(start_pos[1] - end_pos[1]))
+        
+        for platform in platforms: #check if line clips any platform
+            if platform.rect.clipline(start_pos, end_pos):
+                return True
+        return False
 
         
 
@@ -111,6 +129,14 @@ class Bullet(pygame.sprite.Sprite):
             return (0, 0)
         else:
             return (dx / distance, dy / distance) #return unit vector by dividing vector by magnitude
+
+
+
+
+
+
+
+
 
         
 
@@ -209,6 +235,8 @@ line1 = Line(RED, (100, 100), (500, 100))
 platforms = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
+
 
 player=Player("player.png", 25, 50) # instantiate the player
 player.rect.x=50
@@ -284,15 +312,12 @@ while not done:
             elif event.key == pygame.K_SPACE:
                 player.jump()
             elif event.key == pygame.K_f:
-
-                
-                
-
                 
                 if player.sword():
                     print("killed")
                     enemies.remove(enemy1)
                     enemy1.kill()
+                    enemy_fire=False
             
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -334,14 +359,14 @@ while not done:
         
 
 
-        if left:   # Handling of movement with variables to ensure key holds
+        if left:   #handling of movement with variables to ensure key holds
             player.rect.x-=3
         if right:
             player.rect.x+=3
 
             
 
-        if player.rect.colliderect(finish.rect): # check for collision with finish line
+        if player.rect.colliderect(finish.rect): #check for collision with finish line
             state="Finish"
 
         if player.rect.y>550:
@@ -349,21 +374,58 @@ while not done:
             player.rect.x=50
             player.rect.y=50
 
+
+        if firing_timer % 60 == 0: #every 60 frames/1.0 seconds create bullet object
+            if enemy_fire: #will be False if enemy has been killed
+                bullet = Bullet(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x, player.rect.y), 5, 1)
+                bullets.add(bullet)
+                all_sprites_list.add(bullet) #separate sprite group for bullets
+
+
+
+        for bullet in bullets:
+            bullet.update()
+            if bullet.rect.colliderect(player.rect): #check for bullet collision with player for each bullet
+                print("Hit!")
+                health -= 25
+                bullet.kill() #remove bullet after it has hit the player
+            if bullet.rect.x > 700 or bullet.rect.x < 0 or bullet.rect.y > 500 or bullet.rect.y < 0:
+                bullet.kill()
+                print("removed bullet")
+
+
+        if health<=0:
+            state = "Fail" #go to "level failed" screen
+
             
 
-        line1.updateLine((enemy1.rect.x + 5,enemy1.rect.y + 25), (player.rect.x + 12.5, player.rect.y + 10))
+        #line1.updateLine((enemy1.rect.x + 5,enemy1.rect.y + 25), (player.rect.x + 12.5, player.rect.y + 10))
+        
+        enemy_pos = (enemy1.rect.x + 5, enemy1.rect.y + 25)
+        player_pos = (player.rect.x + 12.5, player.rect.y + 10)
+        if line1.intersects_platform(enemy_pos, player_pos, platforms): #check for line intersection using method
+            enemy_fire=False #stop enemy fire when this occurs
+        elif not(line1.intersects_platform(enemy_pos, player_pos, platforms)): #check for line intersection using method
+            enemy_fire=True
+
+        line1.updateLine(enemy_pos, player_pos)
+        
+            
+
+        
 
 
         #bullet1.updateCircle((player.rect.x, player.rect.y))
 
 
-        bullet.update()
+        #bullet.update()
         
         
 
         all_sprites_list.draw(screen)
 
 
+        
         
 
 
@@ -376,10 +438,13 @@ while not done:
     if state == "Finish":
         text(40, "Level Complete", 200, 50)
 
+
+    if state == "Fail":
+        text(40, "Level failed", 200, 50)
+
         
-    if firing_timer % 30 == 0:
-        bullet = Bullet(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x, player.rect.y), 5, 5)
-        all_sprites_list.add(bullet)
+    
+        
 
     
         
