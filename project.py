@@ -27,9 +27,31 @@ playery=200
 left=False
 right=False
 
-firing_timer=0
+level=0
 
+
+firing_timer=0
+timer=0
+finish_time=0
 enemy_fire=True
+
+
+
+class SelectBox(pygame.sprite.Sprite):
+    def __init__(self, width, height, alpha=100):
+        super().__init__()
+
+        
+        #create box with transparency
+        self.image=pygame.Surface((width, height), pygame.SRCALPHA)
+        self.image.fill((0, 0, 0, alpha))
+        self.rect=self.image.get_rect()
+
+    def move(self, posx, posy):
+        self.rect.x=posx
+        self.rect.y=posy
+
+
 
 
 
@@ -236,6 +258,11 @@ platforms = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+menu_box = pygame.sprite.Group()
+
+select_box=SelectBox(150,75)
+
+menu_box.add(select_box)
 
 
 player=Player("player.png", 25, 50) # instantiate the player
@@ -343,10 +370,16 @@ while not done:
         text(40, "Select Level", 240, 50)
 
     if state == "Level 1":
+
+        
+        level=1
+        timer+=1
+        time=timer/60 #convert number of frames to seconds
         
         text(15, "Health:", 20, 10)
         text(15, str(health), 100,10)
-        text(15, "Timer:", 600, 10)
+        text(15, "Timer:", 575, 10)
+        text(15, str(round(time, 2)), 635, 10)
         #screen.blit(player, (playerx,playery))
         all_sprites_list.add(player)
 
@@ -360,16 +393,17 @@ while not done:
 
 
         if left:   #handling of movement with variables to ensure key holds
-            player.rect.x-=3
+            player.rect.x-=4
         if right:
-            player.rect.x+=3
+            player.rect.x+=4
 
             
 
         if player.rect.colliderect(finish.rect): #check for collision with finish line
+            finish_time=round(time, 2)
             state="Finish"
 
-        if player.rect.y>550:
+        if player.rect.y>550: #reset player if they fall off screen
             print("fallen")
             player.rect.x=50
             player.rect.y=50
@@ -405,15 +439,12 @@ while not done:
         player_pos = (player.rect.x + 12.5, player.rect.y + 10)
         if line1.intersects_platform(enemy_pos, player_pos, platforms): #check for line intersection using method
             enemy_fire=False #stop enemy fire when this occurs
-        elif not(line1.intersects_platform(enemy_pos, player_pos, platforms)): #check for line intersection using method
-            enemy_fire=True
+        elif not(line1.intersects_platform(enemy_pos, player_pos, platforms)) and len(enemies)!=0: #check for NOT line intersection using method and enemy existence
+            enemy_fire=True #continue enemy fire when this occurs
 
         line1.updateLine(enemy_pos, player_pos)
         
-            
-
-        
-
+     
 
         #bullet1.updateCircle((player.rect.x, player.rect.y))
 
@@ -436,7 +467,50 @@ while not done:
         
 
     if state == "Finish":
-        text(40, "Level Complete", 200, 50)
+        text(40, "Level {0} Complete".format(level), 170, 50)
+        text(25, "Time: {0}".format(str(finish_time)), 275, 200)
+        text(20, "Main Menu", 100, 400)
+        text(20, "Restart", 310, 400)
+        text(20, "Level Select", 475, 400)
+        
+        menu_box.update()
+        menu_box.draw(screen)
+
+        select_box.rect.x = 80  
+        select_box.rect.y = 375
+
+        
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+
+                    #reset values for restart
+                    
+                    time=0
+                    timer=0
+                    finish_time=0
+                    player.rect.x=50
+                    player.rect.y=50
+                    for bullet in bullets:
+                        bullets.remove(bullet)
+                        bullet.kill()
+                    health=100
+                    left=False
+                    right=False
+                    enemy1=Enemy("enemy.png", 25, 50) #re-instantiate the enemy
+                    enemy1.rect.x=400
+                    enemy1.rect.y=50
+                    enemies.add(enemy1)
+                    all_sprites_list.add(enemy1)
+
+                    state = "Level 1"
+
+                    select_box=SelectBox(100,50)
+                    
+                    
 
 
     if state == "Fail":
