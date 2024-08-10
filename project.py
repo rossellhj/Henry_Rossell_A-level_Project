@@ -29,6 +29,10 @@ right=False
 
 level=0
 
+box_pos=0
+
+house=""
+
 
 firing_timer=0
 timer=0
@@ -260,7 +264,7 @@ enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 menu_box = pygame.sprite.Group()
 
-select_box=SelectBox(150,75)
+select_box=SelectBox(200,75) # instantiate the selecting box
 
 menu_box.add(select_box)
 
@@ -323,15 +327,20 @@ while not done:
             if event.key == pygame.K_SPACE:
                 # Handle state transitions
                 if state == "Main Menu":
-                    state = "Select team"
+                    if box_pos==0:
+                        state = "Select team"
+                    else:
+                        state="Highscores"
                 elif state == "Select team":
                     state = "Select level"
                 elif state == "Select level":
                     state = "Level 1"
             if event.key == pygame.K_UP:
                 player.rect.y-=20
+                box_pos-=1
             elif event.key == pygame.K_DOWN:
                 player.rect.y+=20
+                box_pos+=1
             elif event.key == pygame.K_LEFT:
                 left=True
             elif event.key == pygame.K_RIGHT:
@@ -359,17 +368,88 @@ while not done:
     if state == "Main Menu":
         text(40, "Main Menu", 240, 50)
         text(25, "Select Team", 275, 200)
-        text(25, "Highscores", 280, 250)
+        text(25, "Highscores", 280, 270)
+
+        menu_box.update()
+        menu_box.draw(screen)
+
+        if box_pos<0: # ensure select box positions have a range
+            box_pos=0
+        elif box_pos>1:
+            box_pos=1
+
+        if box_pos==0:
+            select_box.rect.x=250
+            select_box.rect.y=175
+        elif box_pos==1:
+            select_box.rect.y=250
+
+
+    if state == "Highscores":
+        text(40, "Highscores", 240, 50)
+
+        
         
     if state == "Select team":
         text(40, "Select Team", 240, 50)
-        text(20, "Drake", 290, 200)
-        text(20, "Grenville", 260, 240)
+        text(20, "Drake", 320, 160)
+        text(20, "Grenville", 300, 200)
+        text(20, "Howard", 310, 240)
+        text(20, "Jonson", 310, 280)
+        text(20, "Marlowe", 305, 320)
+        text(20, "Raleigh", 305, 360)
+        text(20, "Sidney", 310, 400)
+        text(20, "Spenser", 305, 440)
+
+        menu_box.update()
+        menu_box.draw(screen)
+        
+
+        if box_pos<0: # ensure select box positions have a range
+            box_pos=0
+        elif box_pos>7:
+            box_pos=7
+
+        if box_pos==0:
+            select_box.rect.x=250
+            select_box.rect.y=140
+            select_box.rect.height=10
+            house="Drake"
+        elif box_pos==1:
+            select_box.rect.y=180
+            house="Grenville"
+        elif box_pos==2:
+            select_box.rect.y=220
+            house="Howard"
+        elif box_pos==3:
+            select_box.rect.y=260
+            house="Jonson"
+        elif box_pos==4:
+            select_box.rect.y=300
+            house="Marlowe"
+        elif box_pos==5:
+            select_box.rect.y=340
+            house="Raleigh"
+        elif box_pos==6:
+            select_box.rect.y=380
+            house="Sidney"
+        elif box_pos==7:
+            select_box.rect.y=420
+            house="Spenser"
+            
+            
 
     if state == "Select level":
         text(40, "Select Level", 240, 50)
+        text(40, "1", 150, 150)
+        menu_box.update()
+        menu_box.draw(screen)
+
+        select_box.rect.x=100
+        select_box.rect.y=120
 
     if state == "Level 1":
+        
 
         
         level=1
@@ -400,6 +480,7 @@ while not done:
             
 
         if player.rect.colliderect(finish.rect): #check for collision with finish line
+            print(house) # works
             finish_time=round(time, 2)
             state="Finish"
 
@@ -476,17 +557,25 @@ while not done:
         menu_box.update()
         menu_box.draw(screen)
 
-        select_box.rect.x = 80  
-        select_box.rect.y = 375
+        if box_pos==0: # set select box positions on screen
+            select_box.rect.x = 60  
+            select_box.rect.y = 375
+        elif box_pos==1:
+            select_box.rect.x=270
+        elif box_pos==2:
+            select_box.rect.x=460
 
-        
+        if box_pos<0: # ensure select box positions have a range
+            box_pos=0
+        elif box_pos>2:
+            box_pos=2
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-
+                    
                     #reset values for restart
                     
                     time=0
@@ -500,16 +589,29 @@ while not done:
                     health=100
                     left=False
                     right=False
-                    enemy1=Enemy("enemy.png", 25, 50) #re-instantiate the enemy
+                    enemy1=Enemy("enemy.png", 25, 50) # re-instantiate the enemy
                     enemy1.rect.x=400
                     enemy1.rect.y=50
                     enemies.add(enemy1)
                     all_sprites_list.add(enemy1)
 
-                    state = "Level 1"
 
-                    select_box=SelectBox(100,50)
+                    if box_pos==1: # menu option handling
+                        state = "Level 1"
+                    if box_pos==0:
+                        state = "Main Menu"
+                    if box_pos==2:
+                        state = "Select level"
+
+                    box_pos=0 # reset select box position for next time
                     
+                elif event.key == pygame.K_LEFT:
+                    box_pos-=1
+                elif event.key == pygame.K_RIGHT:
+                    box_pos+=1
+
+               
+            
                     
 
 
