@@ -592,6 +592,12 @@ while not done:
 
 
         
+        with open(directory, "r") as times:
+            lines=times.readlines()
+            lowest_time=lines[level-1].strip() # removes \n characters
+
+        text(20, "Quickest Time: {0}".format(str(lowest_time)), 225, 275)
+
     
         
         menu_box.update()
