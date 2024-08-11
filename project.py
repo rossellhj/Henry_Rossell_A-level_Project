@@ -8,6 +8,11 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 150, 255)
+
+##with open("highscores/highscores.txt","r") as highscores:
+##    for line in highscores:
+##        print(line)
+
  
 pygame.init()
  
@@ -32,6 +37,8 @@ level=0
 box_pos=0
 
 house=""
+
+lowest_time=99.9
 
 
 firing_timer=0
@@ -436,6 +443,8 @@ while not done:
         elif box_pos==7:
             select_box.rect.y=420
             house="Spenser"
+
+
             
             
 
@@ -481,7 +490,33 @@ while not done:
 
         if player.rect.colliderect(finish.rect): #check for collision with finish line
             print(house) # works
+            
+            directory="highscores/{0}.txt".format(house) # define location of highscores text file
+
             finish_time=round(time, 2)
+
+            
+
+            with open(directory, "r") as times: # fetch lowest time for particular team
+                lines=times.readlines()
+                print(lines)
+                
+                lowest_time=lines[0].strip() # removes \n characters
+
+            
+
+            if float(lowest_time)<finish_time:
+                print("not beaten")
+            else:
+                print("beaten")
+                lines[0]="{0}\n".format(str(finish_time)) # ensure new line break for easy retrieval of times
+                
+                with open(directory, 'w') as highscores:
+                    highscores.writelines(lines)
+
+                
+
+                
             state="Finish"
 
         if player.rect.y>550: #reset player if they fall off screen
@@ -553,6 +588,11 @@ while not done:
         text(20, "Main Menu", 100, 400)
         text(20, "Restart", 310, 400)
         text(20, "Level Select", 475, 400)
+
+
+
+        
+    
         
         menu_box.update()
         menu_box.draw(screen)
@@ -631,3 +671,5 @@ while not done:
     clock.tick(60)
 
 pygame.quit()
+
+highscores.close()
