@@ -37,6 +37,8 @@ level=0
 box_pos=0
 
 house=""
+houses=["Drake", "Grenville", "Howard", "Jonson", "Marlowe", "Raleigh", "Sidney", "Spenser"]
+house_initials=["D:", "G:", "H:", "J:", "M:", "R:", "Si:", "Sp:"]
 
 lowest_time=99.9
 
@@ -393,7 +395,36 @@ while not done:
 
 
     if state == "Highscores":
-        text(40, "Highscores", 240, 50)
+        text(40, "Highscores", 240, 25)
+
+        text(40, "1", 125, 75)
+        text(40, "2", 275, 75)
+        text(40, "3", 425, 75)
+        text(40, "4", 575, 75)
+
+        initial_height=132.5
+
+        for house_initial in house_initials:
+            text(30, house_initial, 15, initial_height)
+            initial_height+=40
+
+        
+
+        
+        width=110
+
+        for level in range(4):
+            height=135 # reset height variable for each level
+            for house in houses: 
+                with open("highscores/{0}.txt".format(house), "r") as times: # fetch lowest time for each team
+                    lines=times.readlines()
+                    text(25, lines[level].strip(), width, height) # remove special newline characters
+                    height+=40
+            width+=150
+                    
+
+
+        
 
         
         
