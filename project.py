@@ -34,6 +34,9 @@ right=False
 
 level=0
 
+spawnx=0
+spawny=0
+
 box_pos=0
 
 house=""
@@ -44,6 +47,8 @@ lowest_time=99.9
 
 
 firing_timer=0
+bullet_speed=0
+bullet_freq=0
 timer=0
 finish_time=0
 enemy_fire=True
@@ -279,8 +284,8 @@ menu_box.add(select_box)
 
 
 player=Player("player.png", 25, 50) # instantiate the player
-player.rect.x=50
-player.rect.y=50
+player.rect.x=spawnx
+player.rect.y=spawny
 
 enemy1=Enemy("enemy.png", 25, 50) # instantiate the enemy
 enemy1.rect.x=400
@@ -301,18 +306,25 @@ block2.rect.y=300
 block3=Block(BLACK,100,15)
 block3.rect.x=400
 block3.rect.y=100
+block4=Block(BLACK,300,15)
+block4.rect.x=1000
+block4.rect.y=1000
+block5=Block(BLACK,50,15)
+block5.rect.x=390
+block5.rect.y=300
+
 
 
 line2 = Line(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x,player.rect.y))
 
 
 
-bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, 10)
+bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, bullet_speed)
 
 
 
-platforms.add(block1, block2, block3)
-all_sprites_list.add(player, block1, block2, block3, finish, enemy1, line1)
+platforms.add(block1, block2, block3, block4, block5)
+all_sprites_list.add(player, block1, block2, block3, block4, block5, finish, enemy1, line1)
 
 
 
@@ -343,7 +355,15 @@ while not done:
                 elif state == "Select team":
                     state = "Select level"
                 elif state == "Select level":
-                    state = "Level 1"
+                    # Go to different level states based on position of select box
+                    if box_pos==0:
+                        state = "Level 1"
+                    elif box_pos==1:
+                        state = "Level 2"
+                    elif box_pos==2:
+                        state = "Level 3"
+                    else:
+                        state = "Level 4"
             if event.key == pygame.K_UP:
                 player.rect.y-=20
                 box_pos-=1
@@ -352,8 +372,10 @@ while not done:
                 box_pos+=1
             elif event.key == pygame.K_LEFT:
                 left=True
+                box_pos-=1
             elif event.key == pygame.K_RIGHT:
                 right=True
+                box_pos+=1
             elif event.key == pygame.K_SPACE:
                 player.jump()
             elif event.key == pygame.K_f:
@@ -480,87 +502,113 @@ while not done:
             
 
     if state == "Select level":
-        text(40, "Select Level", 240, 50)
-        text(40, "1", 150, 150)
+        text(40, "Select Level", 240, 100)
+        text(40, "1", 125, 250)
+        text(40, "2", 275, 250)
+        text(40, "3", 425, 250)
+        text(40, "4", 575, 250)
+        
         menu_box.update()
         menu_box.draw(screen)
 
-        select_box.rect.x=100
-        select_box.rect.y=120
+        if box_pos==0:
+            select_box.rect.x=25
+            select_box.rect.y=235
+        elif box_pos==1:
+            select_box.rect.x=175
+        elif box_pos==2:
+            select_box.rect.x=325
+        elif box_pos==3:
+            select_box.rect.x=475
 
-    if state == "Level 1":
-        
-
-        
-        level=1
-        timer+=1
-        time=timer/60 #convert number of frames to seconds
-        
-        text(15, "Health:", 20, 10)
-        text(15, str(health), 100,10)
-        text(15, "Timer:", 575, 10)
-        text(15, str(round(time, 2)), 635, 10)
-        #screen.blit(player, (playerx,playery))
-        all_sprites_list.add(player)
-
-        
-##        platforms.add(block1, block2, block3)
-##        all_sprites_list.add(block1, block2, block3, finish, enemy1)
-
-        
-        
-        
+        if box_pos<0:
+            box_pos=0
+        elif box_pos>3:
+            box_pos=3
 
 
-        if left:   #handling of movement with variables to ensure key holds
-            player.rect.x-=4
-        if right:
-            player.rect.x+=4
+
+    if state == "Level 1" or state == "Level 2" or state == "Level 3" or state == "Level 4":
+
+        if state == "Level 1":
+            if level!=1: 
+                spawnx=50
+                spawny=50
+                player.rect.x=spawnx # only set player's position once not every frame
+                player.rect.y=spawny
+                bullet_speed=1
+                bullet_freq=60
+                level=1
+
+            block1.rect.x=0
+            block1.rect.y=300
+            block2.rect.x=400
+            block2.rect.y=300
+            block3.rect.x=400
+            block3.rect.y=100
+            block4.rect.x=1000
+            block4.rect.y=1000
+            finish.rect.x=(700-(127/4))
+            finish.rect.y=(300-(458/4))
+            
+            
+        if state == "Level 2":
+            if level!=2:                
+                spawnx=100
+                spawny=350
+                player.rect.x=spawnx
+                player.rect.y=spawny
+                bullet_speed=3
+                bullet_freq=30
+                level=2
+
+            block1.rect.x=100 
+            block1.rect.y=450
+            block2.rect.x=500
+            block2.rect.y=400
+            block4.rect.x=0
+            block4.rect.y=240
+            finish.rect.x=0
+            finish.rect.y=125
 
             
+        if state == "Level 3":
+            if level!=3:                
+                spawnx=100
+                spawny=350
+                player.rect.x=spawnx
+                player.rect.y=spawny
+                bullet_speed=1
+                bullet_freq=60
+                level=3
 
-        if player.rect.colliderect(finish.rect): #check for collision with finish line
-            print(house) # works
-            
-            directory="highscores/{0}.txt".format(house) # define location of highscores text file
+            block1.rect.x=-150
+            block1.rect.y=225
+            block2.rect.x=300
+            block2.rect.y=350
+            block5.rect.x=100 
+            block5.rect.y=450
+            block4.rect.x=450
+            block4.rect.y=100
 
-            finish_time=round(time, 2)
+            finish.rect.y=0
+            finish.rect.x=668
 
-            
+        if state == "Level 4":
+            level=4
 
-            with open(directory, "r") as times: # fetch lowest time for particular team
-                lines=times.readlines()
-                print(lines)
-                
-                lowest_time=lines[0].strip() # removes \n characters
-
-            
-
-            if float(lowest_time)<finish_time:
-                print("not beaten")
-            else:
-                print("beaten")
-                lines[0]="{0}\n".format(str(finish_time)) # ensure new line break for easy retrieval of times
-                
-                with open(directory, 'w') as highscores:
-                    highscores.writelines(lines)
-
-                
-
-                
-            state="Finish"
 
         if player.rect.y>550: #reset player if they fall off screen
             print("fallen")
-            player.rect.x=50
-            player.rect.y=50
+            player.rect.x=spawnx
+            player.rect.y=spawny
 
 
-        if firing_timer % 60 == 0: #every 60 frames/1.0 seconds create bullet object
+        if firing_timer % bullet_freq == 0: #every 60 frames/1.0 seconds create bullet object
             if enemy_fire: #will be False if enemy has been killed
-                bullet = Bullet(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x, player.rect.y), 5, 1)
-                bullets.add(bullet)
-                all_sprites_list.add(bullet) #separate sprite group for bullets
+                bullet = Bullet(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x, player.rect.y), 5, bullet_speed)
+                bullets.add(bullet)  #separate sprite group for bullets
+                all_sprites_list.add(bullet)
 
 
 
@@ -578,10 +626,6 @@ while not done:
         if health<=0:
             state = "Fail" #go to "level failed" screen
 
-            
-
-        #line1.updateLine((enemy1.rect.x + 5,enemy1.rect.y + 25), (player.rect.x + 12.5, player.rect.y + 10))
-        
         enemy_pos = (enemy1.rect.x + 5, enemy1.rect.y + 25)
         player_pos = (player.rect.x + 12.5, player.rect.y + 10)
         if line1.intersects_platform(enemy_pos, player_pos, platforms): #check for line intersection using method
@@ -590,26 +634,78 @@ while not done:
             enemy_fire=True #continue enemy fire when this occurs
 
         line1.updateLine(enemy_pos, player_pos)
-        
-     
-
-        #bullet1.updateCircle((player.rect.x, player.rect.y))
-
-
-        #bullet.update()
-        
-        
+   
 
         all_sprites_list.draw(screen)
 
 
         
-        
-
-
-        
 
         player.update(platforms)
+
+
+
+
+
+        
+
+        timer+=1
+        time=timer/60 #convert number of frames to seconds
+        
+        text(15, "Health:", 20, 10)
+        text(15, str(health), 100,10)
+        text(15, "Timer:", 575, 10)
+        text(15, str(round(time, 2)), 635, 10)
+        all_sprites_list.add(player)
+
+        if left:   #handling of movement with variables to ensure key holds
+            player.rect.x-=4
+        if right:
+            player.rect.x+=4
+
+            
+
+        if player.rect.colliderect(finish.rect): #check for collision with finish line
+            print(house) # works
+            
+            directory="highscores/{0}.txt".format(house) # define location of highscores text file
+
+            finish_time=round(time, 2)
+
+            box_pos=0
+
+            
+
+            with open(directory, "r") as times: # fetch lowest time for particular team
+                lines=times.readlines()
+                print(lines)
+                
+                lowest_time=lines[level-1].strip() # removes \n characters
+
+            
+
+            if float(lowest_time)<finish_time:
+                print("not beaten")
+            else:
+                print("beaten")
+                lines[level-1]="{0}\n".format(str(finish_time)) # ensure new line break for easy retrieval of times
+                
+                with open(directory, 'w') as highscores:
+                    highscores.writelines(lines)
+
+            
+                
+            state="Finish"
+
+
+    if state == "Level 2":
+        pass
+
+    if state == "Level 3":
+        pass
+
+    if state == "Level 4":
+        pass
 
         
 
@@ -658,8 +754,8 @@ while not done:
                     time=0
                     timer=0
                     finish_time=0
-                    player.rect.x=50
-                    player.rect.y=50
+                    player.rect.x=spawnx
+                    player.rect.y=spawny
                     for bullet in bullets:
                         bullets.remove(bullet)
                         bullet.kill()
@@ -674,7 +770,7 @@ while not done:
 
 
                     if box_pos==1: # menu option handling
-                        state = "Level 1"
+                        state = "Level {0}".format(level)
                     if box_pos==0:
                         state = "Main Menu"
                     if box_pos==2:
