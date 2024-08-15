@@ -292,6 +292,7 @@ enemy1.rect.x=400
 enemy1.rect.y=50
 enemies.add(enemy1)
 
+
 finish=ImageBlock("finish.png",127/4,458/4)
 finish.rect.x=(700-(127/4))
 finish.rect.y=(300-(458/4))
@@ -312,7 +313,12 @@ block4.rect.y=1000
 block5=Block(BLACK,50,15)
 block5.rect.x=390
 block5.rect.y=300
-
+block6=Block(BLACK,50,50)
+block6.rect.x=1000
+block7=Block(BLACK,50,150)
+block7.rect.x=1000
+block8=Block(BLACK,50,250)
+block8.rect.x=1000
 
 
 line2 = Line(BLACK, (enemy1.rect.x, enemy1.rect.y), (player.rect.x,player.rect.y))
@@ -323,8 +329,8 @@ bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, bullet_speed)
 
 
 
-platforms.add(block1, block2, block3, block4, block5)
-all_sprites_list.add(player, block1, block2, block3, block4, block5, finish, enemy1, line1)
+platforms.add(block1, block2, block3, block4, block5, block6, block7, block8)
+all_sprites_list.add(player, block1, block2, block3, block4, block5, block6, block7, block8, finish, enemy1, line1)
 
 
 
@@ -530,6 +536,13 @@ while not done:
 
     if state == "Level 1" or state == "Level 2" or state == "Level 3" or state == "Level 4":
 
+        for block in platforms:
+            block.rect.x=1000
+
+        for enemy in enemies:
+            enemy.rect.x=1000
+
+
         if state == "Level 1":
             if level!=1: 
                 spawnx=50
@@ -548,6 +561,14 @@ while not done:
             block3.rect.y=100
             block4.rect.x=1000
             block4.rect.y=1000
+            block5.rect.x=1000
+            block5.rect.x=1000
+            block6.rect.x=1000
+            block7.rect.x=1000
+
+            enemy1.rect.x=400
+            enemy1.rect.y=50
+
             finish.rect.x=(700-(127/4))
             finish.rect.y=(300-(458/4))
             
@@ -566,10 +587,17 @@ while not done:
             block1.rect.y=450
             block2.rect.x=500
             block2.rect.y=400
+            block3.rect.x=400
+            block3.rect.y=100
             block4.rect.x=0
             block4.rect.y=240
+            block5.rect.x=390
+            block5.rect.y=300
             finish.rect.x=0
             finish.rect.y=125
+
+            enemy1.rect.x=400
+            enemy1.rect.y=50
 
             
         if state == "Level 3":
@@ -591,11 +619,47 @@ while not done:
             block4.rect.x=450
             block4.rect.y=100
 
+            enemy1.rect.x=450
+
+
             finish.rect.y=0
             finish.rect.x=668
 
         if state == "Level 4":
-            level=4
+            if level!=4:                
+                spawnx=550
+                spawny=350
+                player.rect.x=spawnx
+                player.rect.y=spawny
+                bullet_speed=1
+                bullet_freq=60
+                level=4
+
+            block1.rect.x=1000
+
+            block2.rect.x=1000
+
+            block3.rect.x=1000
+
+            block4.rect.x=2000
+            block4.rect.y=450
+
+            block5.rect.x=1000
+
+            block6.rect.x=500
+            block6.rect.y=400
+
+            block7.rect.x=350
+            block7.rect.y=300
+
+            block8.rect.x=200
+            block8.rect.y=200
+
+            finish.rect.x=0
+            finish.rect.y=100
+
+            enemy1.rect.x=100
+
 
 
         if player.rect.y>550: #reset player if they fall off screen
