@@ -9,6 +9,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 150, 255)
 
+
 ##with open("highscores/highscores.txt","r") as highscores:
 ##    for line in highscores:
 ##        print(line)
@@ -104,7 +105,8 @@ class Line(pygame.sprite.Sprite):
         
     def update(self):
         self.image = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        pygame.draw.line(self.image, self.color, self.start_pos, self.end_pos, self.width)
+        alpha=(*self.color[:3],0) # add transparency
+        pygame.draw.line(self.image, alpha, self.start_pos, self.end_pos, self.width) 
         self.rect = self.image.get_rect()
 
     def updateLine(self, startpos, endpos):
@@ -282,6 +284,8 @@ select_box=SelectBox(200,75) # instantiate the selecting box
 
 menu_box.add(select_box)
 
+background1=ImageBlock("background1.png",1000,1000) # instantiate the background
+background2=ImageBlock("background2.png",1000,1000) 
 
 player=Player("player.png", 25, 50) # instantiate the player
 player.rect.x=spawnx
@@ -291,6 +295,9 @@ enemy1=Enemy("enemy.png", 25, 50) # instantiate the enemy
 enemy1.rect.x=400
 enemy1.rect.y=50
 enemies.add(enemy1)
+
+
+
 
 
 finish=ImageBlock("finish.png",127/4,458/4)
@@ -330,7 +337,9 @@ bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, bullet_speed)
 
 
 platforms.add(block1, block2, block3, block4, block5, block6, block7, block8)
-all_sprites_list.add(player, block1, block2, block3, block4, block5, block6, block7, block8, finish, enemy1, line1)
+all_sprites_list.add(background1, player, block1, block2, block3, block4, block5,
+                     block6, block7, block8, finish, enemy1, line1)
+
 
 
 
@@ -370,6 +379,8 @@ while not done:
                         state = "Level 3"
                     else:
                         state = "Level 4"
+                elif state == "Highscores":
+                    state = "Main Menu"
             if event.key == pygame.K_UP:
                 player.rect.y-=20
                 box_pos-=1
@@ -536,7 +547,14 @@ while not done:
 
     if state == "Level 1" or state == "Level 2" or state == "Level 3" or state == "Level 4":
 
-        for block in platforms:
+
+
+        
+
+
+        
+
+        for block in platforms: # moving all objects off screen before defining layouts
             block.rect.x=1000
 
         for enemy in enemies:
@@ -544,14 +562,19 @@ while not done:
 
 
         if state == "Level 1":
-            if level!=1: 
+            
+            if level!=1:
+                
+                
+                level=1
                 spawnx=50
                 spawny=50
                 player.rect.x=spawnx # only set player's position once not every frame
                 player.rect.y=spawny
                 bullet_speed=1
                 bullet_freq=60
-                level=1
+                
+                
 
             block1.rect.x=0
             block1.rect.y=300
