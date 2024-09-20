@@ -35,6 +35,8 @@ right=False
 
 level=0
 
+
+
 spawnx=0
 spawny=0
 
@@ -225,23 +227,44 @@ class Player(ImageBlock):
     def __init__(self, image_path, width, height):
         super().__init__(image_path, width, height)
         self.velocity_y=0
-        self.jump_height=-3
+        self.jump_height=-7.5
+        self.velocity_x=0
+        self.gravity = .6
 
     def update(self, platforms):
-        self.velocity_y+=0.3
-        self.rect.y+=self.velocity_y
-
-        # check for collisions with platforms
+        # Horizontal movement and collision
+        self.rect.x += self.velocity_x
         collisions = pygame.sprite.spritecollide(self, platforms, False)
         for platform in collisions:
-            # if the player is moving downwards, stop downwards movement
-            if self.velocity_y >0:
+            if self.velocity_x > 0:  # Moving right
+                self.rect.right = platform.rect.left
+            elif self.velocity_x < 0:  # Moving left
+                self.rect.left = platform.rect.right
+
+        # Vertical movement and gravity
+        self.velocity_y += self.gravity
+        self.rect.y += self.velocity_y
+        #self.on_ground = False
+        collisions = pygame.sprite.spritecollide(self, platforms, False)
+          # Reset the ground check
+        for platform in collisions:
+            #self._on_ground = False
+            if self.velocity_y > 0:  # Moving down (falling)
                 self.rect.bottom = platform.rect.top
-                self.velocity_y=0
-                
+                self.velocity_y = 0
+                self.on_ground = True  # The player is now on the ground
+            elif self.velocity_y < 0:  # Moving up (jumping)
+                self.rect.top = platform.rect.bottom
+                self.velocity_y = 0
+                self.on_ground = True
+            else:
+                self.on_ground = False
+
+        if self.velocity_y == 0 and not self.on_ground:
+            self.rect.y += 1
         
-    def jump(self):
-        self.velocity_y=self.jump_height
+    def jump(self): 
+        self.velocity_y = self.jump_height
 
     def sword(self):
         # instantiate temporary box where sword is being struck
@@ -393,8 +416,9 @@ while not done:
             elif event.key == pygame.K_RIGHT:
                 right=True
                 box_pos+=1
-            elif event.key == pygame.K_SPACE:
+            elif event.key == pygame.K_SPACE:         
                 player.jump()
+                
             elif event.key == pygame.K_f:
                 
                 if player.sword():
@@ -746,9 +770,11 @@ while not done:
         all_sprites_list.add(player)
 
         if left:   #handling of movement with variables to ensure key holds
-            player.rect.x-=4
-        if right:
-            player.rect.x+=4
+            player.velocity_x=-5
+        elif right:
+            player.velocity_x=5
+        else:
+            player.velocity_x=0
 
             
 
@@ -887,6 +913,7 @@ while not done:
     pygame.display.flip()
 
     firing_timer+=1
+   
 
     clock.tick(60)
 
