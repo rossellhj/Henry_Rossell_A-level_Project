@@ -33,6 +33,8 @@ playery=200
 left=False
 right=False
 
+player_speed=5
+
 level=0
 
 
@@ -208,6 +210,11 @@ class ImageBlock(pygame.sprite.Sprite):
         self.rect.y += 20
 
 
+class PowerUp(ImageBlock):
+    def __init__(self, image_path, width, height):
+        super().__init__(image_path, width, height)
+
+
 class Enemy(ImageBlock):
     def __init__(self, image_path, width, height):
         super().__init__(image_path, width, height)
@@ -229,7 +236,7 @@ class Player(ImageBlock):
         self.velocity_y=0
         self.jump_height=-7.5
         self.velocity_x=0
-        self.gravity = .6
+        self.gravity = .3
 
     def update(self, platforms):
         # Horizontal movement and collision
@@ -318,6 +325,10 @@ enemy1=Enemy("enemy.png", 25, 50) # instantiate the enemy
 enemy1.rect.x=400
 enemy1.rect.y=50
 enemies.add(enemy1)
+
+##powerup1=PowerUp("player.png", 100, 100)
+##powerup1.rect.x=50
+##powerup1.rect.y=50
 
 
 
@@ -416,8 +427,11 @@ while not done:
             elif event.key == pygame.K_RIGHT:
                 right=True
                 box_pos+=1
-            elif event.key == pygame.K_SPACE:         
-                player.jump()
+            elif event.key == pygame.K_SPACE:
+                if player.velocity_y <= 0.3 and player.velocity_y >= -0.3: #check if player is vertically stationary
+                    player.jump()
+                
+                    
                 
             elif event.key == pygame.K_f:
                 
@@ -709,6 +723,9 @@ while not done:
 
 
 
+
+
+
         if player.rect.y>550: #reset player if they fall off screen
             print("fallen")
             player.rect.x=spawnx
@@ -754,6 +771,12 @@ while not done:
 
         player.update(platforms)
 
+        collisions = pygame.sprite.spritecollide(player, platforms, False)
+        if collisions and player.velocity_y >= 0:  # Player is touching a platform
+            can_jump = True
+        else:
+            can_jump = False
+
 
 
 
@@ -770,9 +793,9 @@ while not done:
         all_sprites_list.add(player)
 
         if left:   #handling of movement with variables to ensure key holds
-            player.velocity_x=-5
+            player.velocity_x=-player_speed
         elif right:
-            player.velocity_x=5
+            player.velocity_x=player_speed
         else:
             player.velocity_x=0
 
