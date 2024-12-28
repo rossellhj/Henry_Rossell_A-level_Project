@@ -34,6 +34,12 @@ left=False
 right=False
 
 player_speed=5
+double_speed_activated=False
+double_speed_timer=0
+
+player_jump_height=-7.5
+high_jump_activated=False
+high_jump_timer=0
 
 level=0
 
@@ -215,6 +221,8 @@ class PowerUp(ImageBlock):
         super().__init__(image_path, width, height)
 
 
+
+
 class Enemy(ImageBlock):
     def __init__(self, image_path, width, height):
         super().__init__(image_path, width, height)
@@ -234,7 +242,7 @@ class Player(ImageBlock):
     def __init__(self, image_path, width, height):
         super().__init__(image_path, width, height)
         self.velocity_y=0
-        self.jump_height=-7.5
+        self.jump_height=player_jump_height
         self.velocity_x=0
         self.gravity = .3
 
@@ -326,9 +334,9 @@ enemy1.rect.x=400
 enemy1.rect.y=50
 enemies.add(enemy1)
 
-##powerup1=PowerUp("player.png", 100, 100)
-##powerup1.rect.x=50
-##powerup1.rect.y=50
+doubleSpeed=PowerUp("doubleSpeed.png", 25, 25) # instantiate the double speed power up
+doubleSpeed.rect.x=1000
+doubleSpeed.rect.y=1000
 
 
 
@@ -372,7 +380,7 @@ bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, bullet_speed)
 
 platforms.add(block1, block2, block3, block4, block5, block6, block7, block8)
 all_sprites_list.add(background1, player, block1, block2, block3, block4, block5,
-                     block6, block7, block8, finish, enemy1, line1)
+                     block6, block7, block8, finish, enemy1, line1, doubleSpeed)
 
 
 
@@ -646,8 +654,8 @@ while not done:
 
             block1.rect.x=100 
             block1.rect.y=450
-            block2.rect.x=500
-            block2.rect.y=400
+            block2.rect.x=450
+            block2.rect.y=380
             block3.rect.x=400
             block3.rect.y=100
             block4.rect.x=0
@@ -659,6 +667,9 @@ while not done:
 
             enemy1.rect.x=400
             enemy1.rect.y=50
+
+            doubleSpeed.rect.x=650
+            doubleSpeed.rect.y=350
 
             
         if state == "Level 3":
@@ -705,7 +716,8 @@ while not done:
             block4.rect.x=2000
             block4.rect.y=450
 
-            block5.rect.x=1000
+            block5.rect.x=600
+            block5.rect.y=450
 
             block6.rect.x=500
             block6.rect.y=400
@@ -750,6 +762,13 @@ while not done:
                 bullet.kill()
                 print("removed bullet")
 
+        if doubleSpeed.rect.colliderect(player.rect): #check for player collision with double speed power up
+            double_speed_activated=True
+            player_speed=7.5 #change speed
+            doubleSpeed.kill() #remove power up
+
+
+     
 
         if health<=0:
             state = "Fail" #go to "level failed" screen
@@ -786,8 +805,21 @@ while not done:
         timer+=1
         time=timer/60 #convert number of frames to seconds
         
+        if double_speed_activated:
+            double_speed_timer+=1 #increment timer
+
+        if double_speed_timer>=150: #reset after 2 seconds
+            double_speed_activated=False
+            double_speed_timer=0
+            player_speed=5
+
+        
         text(15, "Health:", 20, 10)
         text(15, str(health), 100,10)
+
+        if double_speed_activated and (double_speed_timer%30)<=20: #check if double speed is activated
+            text(15, "DOUBLE SPEED", 275, 10)
+        
         text(15, "Timer:", 575, 10)
         text(15, str(round(time, 2)), 635, 10)
         all_sprites_list.add(player)
@@ -890,6 +922,7 @@ while not done:
                     time=0
                     timer=0
                     finish_time=0
+                    player_speed=5
                     player.rect.x=spawnx
                     player.rect.y=spawny
                     for bullet in bullets:
@@ -903,6 +936,12 @@ while not done:
                     enemy1.rect.y=50
                     enemies.add(enemy1)
                     all_sprites_list.add(enemy1)
+                    double_speed_activated=False
+                    double_speed_timer=0
+                    doubleSpeed=PowerUp("doubleSpeed.png", 25, 25)
+                    all_sprites_list.add(doubleSpeed)
+                    doubleSpeed.rect.x=1000
+                    doubleSpeed.rect.y=1000
 
 
                     if box_pos==1: # menu option handling
