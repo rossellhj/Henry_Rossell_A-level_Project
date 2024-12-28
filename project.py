@@ -277,7 +277,11 @@ class Player(ImageBlock):
 
         if self.velocity_y == 0 and not self.on_ground:
             self.rect.y += 1
-        
+
+
+    def setJumpHeight(self, player_jump_height):
+        self.jump_height=player_jump_height
+    
     def jump(self): 
         self.velocity_y = self.jump_height
 
@@ -334,9 +338,14 @@ enemy1.rect.x=400
 enemy1.rect.y=50
 enemies.add(enemy1)
 
-doubleSpeed=PowerUp("doubleSpeed.png", 25, 25) # instantiate the double speed power up
-doubleSpeed.rect.x=1000
-doubleSpeed.rect.y=1000
+double_speed=PowerUp("double_speed.png", 25, 25) # instantiate the double speed power up
+double_speed.rect.x=1000
+double_speed.rect.y=1000
+
+high_jump=PowerUp("high_jump.png", 25, 25)
+high_jump.rect.x=1000
+high_jump.rect.y=1000
+
 
 
 
@@ -380,7 +389,8 @@ bullet = Bullet(BLACK, enemy1.rect.center, player.rect.center, 5, bullet_speed)
 
 platforms.add(block1, block2, block3, block4, block5, block6, block7, block8)
 all_sprites_list.add(background1, player, block1, block2, block3, block4, block5,
-                     block6, block7, block8, finish, enemy1, line1, doubleSpeed)
+                     block6, block7, block8, finish, enemy1, line1, double_speed,
+                     high_jump)
 
 
 
@@ -650,6 +660,8 @@ while not done:
                 player.rect.y=spawny
                 bullet_speed=3
                 bullet_freq=30
+                double_speed.rect.x=650
+                double_speed.rect.y=342.5
                 level=2
 
             block1.rect.x=100 
@@ -668,8 +680,7 @@ while not done:
             enemy1.rect.x=400
             enemy1.rect.y=50
 
-            doubleSpeed.rect.x=650
-            doubleSpeed.rect.y=350
+
 
             
         if state == "Level 3":
@@ -680,7 +691,12 @@ while not done:
                 player.rect.y=spawny
                 bullet_speed=1
                 bullet_freq=60
+                block6.rect.x=200
+                block6.rect.y=300
+                high_jump.rect.x=550
+                high_jump.rect.y=312.5
                 level=3
+                
 
             block1.rect.x=-150
             block1.rect.y=225
@@ -690,6 +706,18 @@ while not done:
             block5.rect.y=450
             block4.rect.x=450
             block4.rect.y=100
+            
+            block6.rect.x=200
+            #block.rect.y=400
+
+
+
+            if (timer%1)==0: #run every frame
+                if (timer%(300))<150:
+                    block6.rect.y+=1 #change positions of block for moving
+                else:
+                    block6.rect.y-=1
+            
 
             enemy1.rect.x=450
 
@@ -705,6 +733,8 @@ while not done:
                 player.rect.y=spawny
                 bullet_speed=1
                 bullet_freq=60
+                high_jump.rect.x=610
+                high_jump.rect.y=412.5
                 level=4
 
             block1.rect.x=1000
@@ -738,6 +768,8 @@ while not done:
 
 
 
+
+
         if player.rect.y>550: #reset player if they fall off screen
             print("fallen")
             player.rect.x=spawnx
@@ -761,11 +793,22 @@ while not done:
             if bullet.rect.x > 700 or bullet.rect.x < 0 or bullet.rect.y > 500 or bullet.rect.y < 0:
                 bullet.kill()
                 print("removed bullet")
+                
 
-        if doubleSpeed.rect.colliderect(player.rect): #check for player collision with double speed power up
+        if double_speed.rect.colliderect(player.rect): #check for player collision with double speed power up
             double_speed_activated=True
             player_speed=7.5 #change speed
-            doubleSpeed.kill() #remove power up
+            double_speed.kill() #remove power up
+            
+
+        if high_jump.rect.colliderect(player.rect): #check for player collision with high jump power up
+            high_jump_activated=True
+            if level!=3:
+                player.setJumpHeight(-10.0) #change jump height
+            elif level==3:
+                player.setJumpHeight(-13.0)
+            high_jump.kill() #remove power up
+
 
 
      
@@ -797,21 +840,44 @@ while not done:
             can_jump = False
 
 
-
+    
 
 
         
 
         timer+=1
         time=timer/60 #convert number of frames to seconds
-        
+
+
+        if (timer%4)==0: #run every 4 frames
+            if (timer%(120))<60:
+                double_speed.rect.y+=1 #change positions of power ups for bobbing
+                high_jump.rect.y+=1
+            else:
+                double_speed.rect.y-=1
+                high_jump.rect.y-=1
+            
+            
         if double_speed_activated:
             double_speed_timer+=1 #increment timer
 
-        if double_speed_timer>=150: #reset after 2 seconds
+        if double_speed_timer>=150: #reset after 2.5 seconds
             double_speed_activated=False
             double_speed_timer=0
             player_speed=5
+
+        if high_jump_activated:
+            high_jump_timer+=1 #increment timer
+
+        if high_jump_timer>=180 and level!=3: #reset after 3.0 seconds
+            high_jump_activated=False
+            high_jump_timer=0
+            player.setJumpHeight(-7.5)
+
+        if high_jump_timer>=210 and level==3: #reset after 5.0 seconds
+            high_jump_activated=False
+            high_jump_timer=0
+            player.setJumpHeight(-7.5)
 
         
         text(15, "Health:", 20, 10)
@@ -819,6 +885,9 @@ while not done:
 
         if double_speed_activated and (double_speed_timer%30)<=20: #check if double speed is activated
             text(15, "DOUBLE SPEED", 275, 10)
+
+        if high_jump_activated and (high_jump_timer%30)<=20: #check if high jump is activated
+            text(15, "HIGH JUMP", 300, 10)
         
         text(15, "Timer:", 575, 10)
         text(15, str(round(time, 2)), 635, 10)
@@ -839,6 +908,8 @@ while not done:
             directory="highscores/{0}.txt".format(house) # define location of highscores text file
 
             finish_time=round(time, 2)
+
+            #player.setJumpHeight(-7.5)
 
             box_pos=0
 
@@ -938,10 +1009,14 @@ while not done:
                     all_sprites_list.add(enemy1)
                     double_speed_activated=False
                     double_speed_timer=0
-                    doubleSpeed=PowerUp("doubleSpeed.png", 25, 25)
-                    all_sprites_list.add(doubleSpeed)
-                    doubleSpeed.rect.x=1000
-                    doubleSpeed.rect.y=1000
+                    double_speed=PowerUp("double_speed.png", 25, 25)
+                    double_speed.rect.x=1000
+                    all_sprites_list.add(double_speed)
+                    high_jump=PowerUp("high_jump.png", 25, 25)
+                    high_jump.rect.x=1000
+                    all_sprites_list.add(high_jump)
+                    high_jump_activated=False
+                    player.setJumpHeight(-7.5)
 
 
                     if box_pos==1: # menu option handling
