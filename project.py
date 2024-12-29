@@ -324,8 +324,8 @@ enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 menu_box = pygame.sprite.Group()
 
-select_box=SelectBox(200,75) # instantiate the selecting box
-select_box.rect.height=10
+select_box=SelectBox(200,50) # instantiate the selecting box
+#select_box.rect.height=10
 
 menu_box.add(select_box)
 
@@ -491,9 +491,9 @@ while not done:
 
             if box_pos==0:
                 select_box.rect.x=250
-                select_box.rect.y=175
+                select_box.rect.y=190
             elif box_pos==1:
-                select_box.rect.y=250
+                select_box.rect.y=260
 
 
         if state == "Highscores":
@@ -554,29 +554,29 @@ while not done:
 
             if box_pos==0:
                 select_box.rect.x=250
-                select_box.rect.y=140
+                select_box.rect.y=145
                 select_box.rect.height=10
                 house="Drake"
             elif box_pos==1:
-                select_box.rect.y=180
+                select_box.rect.y=185
                 house="Grenville"
             elif box_pos==2:
-                select_box.rect.y=220
+                select_box.rect.y=225
                 house="Howard"
             elif box_pos==3:
-                select_box.rect.y=260
+                select_box.rect.y=265
                 house="Jonson"
             elif box_pos==4:
-                select_box.rect.y=300
+                select_box.rect.y=305
                 house="Marlowe"
             elif box_pos==5:
-                select_box.rect.y=340
+                select_box.rect.y=345
                 house="Raleigh"
             elif box_pos==6:
-                select_box.rect.y=380
+                select_box.rect.y=385
                 house="Sidney"
             elif box_pos==7:
-                select_box.rect.y=420
+                select_box.rect.y=425
                 house="Spenser"
 
 
@@ -595,7 +595,7 @@ while not done:
 
             if box_pos==0:
                 select_box.rect.x=25
-                select_box.rect.y=235
+                select_box.rect.y=250
             elif box_pos==1:
                 select_box.rect.x=175
             elif box_pos==2:
@@ -991,7 +991,7 @@ while not done:
 
             if box_pos==0: # set select box positions on screen
                 select_box.rect.x = 60  
-                select_box.rect.y = 375
+                select_box.rect.y = 388
             elif box_pos==1:
                 select_box.rect.x=270
             elif box_pos==2:
